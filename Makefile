@@ -1,4 +1,4 @@
-.PHONY: all build test clean shim bindings coverage coverage-html
+.PHONY: all build test clean shim bindings coverage coverage-html format
 
 all: shim bindings build
 
@@ -95,6 +95,36 @@ clean:
 	rm -f lcov.info
 	find . -name "*.exe" -delete
 	find . -name "*.pdb" -delete
+
+# Format code with NPH
+format:
+	@echo "Formatting Nim code with NPH..."
+	@NPH_BIN=$$(find ~/.asdf/installs/nim -name "nph" -type f 2>/dev/null | head -1); \
+	if [ -z "$$NPH_BIN" ] && [ -f "$$HOME/.asdf/installs/nim/2.2.6/nimble/pkgs2/nph-0.6.1-5202779f46888bf90a6bc92807ee7865b1207ac0/nph" ]; then \
+		NPH_BIN="$$HOME/.asdf/installs/nim/2.2.6/nimble/pkgs2/nph-0.6.1-5202779f46888bf90a6bc92807ee7865b1207ac0/nph"; \
+	fi; \
+	if [ -n "$$NPH_BIN" ] && [ -x "$$NPH_BIN" ]; then \
+		$$NPH_BIN src/nimlana/*.nim src/*.nim tests/*.nim 2>&1 || true; \
+		echo "✓ Code formatted"; \
+	else \
+		echo "Error: nph not found. Install with: nimble install nph"; \
+		exit 1; \
+	fi
+
+# Check code formatting with NPH
+format-check:
+	@echo "Checking code formatting with NPH..."
+	@NPH_BIN=$$(find ~/.asdf/installs/nim -name "nph" -type f 2>/dev/null | head -1); \
+	if [ -z "$$NPH_BIN" ] && [ -f "$$HOME/.asdf/installs/nim/2.2.6/nimble/pkgs2/nph-0.6.1-5202779f46888bf90a6bc92807ee7865b1207ac0/nph" ]; then \
+		NPH_BIN="$$HOME/.asdf/installs/nim/2.2.6/nimble/pkgs2/nph-0.6.1-5202779f46888bf90a6bc92807ee7865b1207ac0/nph"; \
+	fi; \
+	if [ -n "$$NPH_BIN" ] && [ -x "$$NPH_BIN" ]; then \
+		$$NPH_BIN --check src/nimlana/*.nim src/*.nim tests/*.nim 2>&1 || exit 1; \
+		echo "✓ Code formatting is correct"; \
+	else \
+		echo "Error: nph not found. Install with: nimble install nph"; \
+		exit 1; \
+	fi
 
 # Development: watch and rebuild
 watch:

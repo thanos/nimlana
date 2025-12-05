@@ -78,6 +78,7 @@ make shim      # Build Rust shim library
 make bindings  # Generate Nim bindings (requires futhark)
 make build     # Build Nim project
 make test      # Run tests
+make format    # Format code with NPH
 ```
 
 ### Using Nimble

@@ -6,6 +6,8 @@ Nimlana has a comprehensive test suite covering all major components:
 
 1. **Basic Tests** (`test_all.nim`) - Core functionality tests
 2. **Coverage Tests** (`test_coverage.nim`) - Edge cases and additional coverage
+3. **UDP Socket Tests** (`test_udp_socket.nim`) - UDP socket and DatagramTransport functionality
+4. **Block Engine Mock Tests** (`test_blockengine_mock.nim`) - Block Engine client mock tests
 
 ## Running Tests
 
@@ -27,6 +29,12 @@ nimble test
 
 # Coverage tests only
 nimble test_coverage
+
+# UDP socket tests
+nimble test_udp_socket
+
+# Block Engine mock tests
+nimble test_blockengine_mock
 ```
 
 ## Test Coverage
@@ -40,9 +48,11 @@ nimble test_coverage
 
 ### Phase 2 Components
 - ✅ TPU Ingestor (packet parsing, deduplication)
-- ✅ Block Engine Client (structure)
+- ✅ UDP Socket (DatagramTransport integration, packet handling)
+- ✅ Block Engine Client (structure, bundle handling)
 - ✅ Relayer (coordination)
 - ✅ Edge cases and error paths
+- ✅ Mock tests for network functionality
 
 ## Coverage Statistics
 

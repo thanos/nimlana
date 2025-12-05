@@ -1,0 +1,52 @@
+// Jito Block Engine gRPC API definitions
+// Based on Jito's block engine API for MEV bundle submission
+
+syntax = "proto3";
+
+package jito;
+
+// Bundle submission service
+service BundleService {
+  // Send a bundle to the block engine
+  rpc SendBundle(SendBundleRequest) returns (SendBundleResponse);
+  
+  // Get bundle status
+  rpc GetBundleStatuses(GetBundleStatusesRequest) returns (GetBundleStatusesResponse);
+}
+
+// Request to send a bundle
+message SendBundleRequest {
+  repeated bytes transactions = 1;  // Serialized Solana transactions
+  string tip_account = 2;           // Base58 encoded tip account pubkey
+  uint64 tip_amount = 3;            // Tip amount in lamports
+}
+
+// Response from bundle submission
+message SendBundleResponse {
+  bool accepted = 1;                // Whether bundle was accepted
+  string bundle_id = 2;             // Bundle identifier
+  string error_message = 3;          // Error message if rejected
+}
+
+// Request to get bundle statuses
+message GetBundleStatusesRequest {
+  repeated string bundle_ids = 1;  // Bundle IDs to check
+}
+
+// Response with bundle statuses
+message GetBundleStatusesResponse {
+  repeated BundleStatus statuses = 1;
+}
+
+// Bundle status
+message BundleStatus {
+  string bundle_id = 1;
+  enum Status {
+    PENDING = 0;
+    CONFIRMED = 1;
+    FAILED = 2;
+  }
+  Status status = 2;
+  string error_message = 3;
+}
+

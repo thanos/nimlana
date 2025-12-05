@@ -36,6 +36,8 @@ test-all: build
 	@echo "Running all tests..."
 	nimble test
 	nimble test_coverage
+	nimble test_udp_socket
+	nimble test_blockengine_mock
 
 # Run tests with code coverage
 coverage: shim

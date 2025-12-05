@@ -23,9 +23,17 @@ task test, "Run tests":
 task test_coverage, "Run coverage tests":
   exec "nim c -r tests/test_coverage.nim"
 
-task test_all, "Run all tests (basic + coverage)":
+task test_udp_socket, "Run UDP socket tests":
+  exec "nim c -r tests/test_udp_socket.nim"
+
+task test_blockengine_mock, "Run Block Engine mock tests":
+  exec "nim c -r tests/test_blockengine_mock.nim"
+
+task test_all, "Run all tests (basic + coverage + new functionality)":
   exec "nim c -r tests/test_all.nim"
   exec "nim c -r tests/test_coverage.nim"
+  exec "nim c -r tests/test_udp_socket.nim"
+  exec "nim c -r tests/test_blockengine_mock.nim"
 
 task build_shim, "Build the Rust shim library":
   exec "cd shim && cargo build --release"

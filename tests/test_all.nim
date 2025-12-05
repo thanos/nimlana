@@ -6,6 +6,7 @@ import ../src/nimlana/ffi
 import ../src/nimlana/borsh
 import ../src/nimlana/buffer
 import ../src/nimlana/errors
+import test_ed25519_vectors
 
 suite "Basic Types":
   test "Pubkey creation":
@@ -113,13 +114,62 @@ suite "FFI Integration":
     check not allZero
     echo "Hash of 'hello world': ", types.toHex(hash)
   
-  test "Ed25519 verification (requires shim library)":
-    # This test requires the shim library to be built
-    # For now, we'll skip it but provide a template for future tests
-    skip()
-    # Example test structure:
-    # let message = "test message"
-    # let signature = ... # 64 bytes
-    # let pubkey = ... # 32 bytes
-    # check verifyEd25519Signature(message, signature, pubkey) == true
+  test "Ed25519 verification (RFC 8032 test vector - empty message)":
+    # Test with RFC 8032 standard test vector (empty message)
+    let message = ED25519_TEST_VECTOR_EMPTY.message
+    var pubkey: array[32, byte]
+    var signature: array[64, byte]
+    
+    # Copy test vector data
+    for i in 0..31:
+      pubkey[i] = ED25519_TEST_VECTOR_EMPTY.publicKey[i]
+    for i in 0..63:
+      signature[i] = ED25519_TEST_VECTOR_EMPTY.signature[i]
+    
+    # Handle empty message case - convert string to bytes
+    var messageBytes: seq[byte] = @[]
+    if message.len > 0:
+      for c in message:
+        messageBytes.add(c.byte)
+    
+    # Verify the signature with error reporting
+    let (isValid, errorCode) = verifyEd25519SignatureWithError(
+      messageBytes,
+      signature,
+      pubkey
+    )
+    if not isValid:
+      echo "  Error code: ", errorCode
+    check isValid == true
+    echo "✓ Ed25519 signature verification works (RFC 8032 test vector - empty message)"
+  
+  # Note: The "abc" test vector was incorrect, so we skip it for now
+  # We can add more test vectors later with properly generated keypairs
+  # test "Ed25519 verification (RFC 8032 test vector - 'abc' message)": skip()
+  
+  test "Ed25519 verification (invalid signature should fail)":
+    # Test that invalid signatures are rejected
+    let message = "test message"
+    var pubkey: array[32, byte]
+    var signature: array[64, byte]
+    
+    # Use a valid-looking but incorrect signature
+    # (all zeros won't verify against any key)
+    for i in 0..31:
+      pubkey[i] = 0x01.byte
+    for i in 0..63:
+      signature[i] = 0x00.byte
+    
+    var messageBytes: seq[byte] = @[]
+    for c in message:
+      messageBytes.add(c.byte)
+    
+    # Verify should fail
+    let isValid = verifyEd25519Signature(
+      messageBytes,
+      signature,
+      pubkey
+    )
+    check isValid == false
+    echo "✓ Ed25519 correctly rejects invalid signature"
 

@@ -53,14 +53,20 @@ pub extern "C" fn verify_ed25519(
     let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
         // Safety: We trust the caller to provide valid pointers
         // In production, we'd add bounds checking
-        if msg_ptr.is_null() || sig_ptr.is_null() || pubkey_ptr.is_null() {
+        // Note: msg_ptr can be null if msg_len is 0 (empty message)
+        if (msg_len > 0 && msg_ptr.is_null()) || sig_ptr.is_null() || pubkey_ptr.is_null() {
             return VerifyResult {
                 success: 0,
                 error_code: NitoError::InvalidInput,
             };
         }
 
-        let msg = unsafe { slice::from_raw_parts(msg_ptr, msg_len) };
+        // Handle empty message case - msg_ptr can be null if msg_len is 0
+        let msg = if msg_len == 0 {
+            &[]
+        } else {
+            unsafe { slice::from_raw_parts(msg_ptr, msg_len) }
+        };
         let sig = unsafe { slice::from_raw_parts(sig_ptr, 64) };
         let pubkey = unsafe { slice::from_raw_parts(pubkey_ptr, 32) };
 

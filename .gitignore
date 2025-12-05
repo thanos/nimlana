@@ -1,3 +1,32 @@
+# Nim
+nimlana
+*.exe
+*.pdb
 nimcache/
-nimblecache/
-htmldocs/
+*.o
+*.obj
+
+# Rust
+shim/target/
+Cargo.lock
+
+# Generated files
+src/nito_solana.nim
+shim/target/release/nito_shim.h
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.dll
+*.so
+*.dylib
+*.a

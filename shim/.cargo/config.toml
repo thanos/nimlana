@@ -1,0 +1,5 @@
+# Cargo configuration for the shim crate
+
+[build]
+rustflags = ["-C", "link-arg=-Wl,-undefined,dynamic_lookup"]
+

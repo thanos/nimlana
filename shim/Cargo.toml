@@ -1,0 +1,18 @@
+[package]
+name = "nito_shim"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "nito_shim"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+# Solana SDK dependencies
+solana-sdk = "1.18"
+ed25519-dalek = "2.0"
+sha2 = "0.10"
+
+[build-dependencies]
+cbindgen = "0.26"
+

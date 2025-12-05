@@ -22,26 +22,27 @@ proc runRelayer(relayer: Relayer) {.async.} =
   ## Async function to run the relayer
   # Start relayer in background
   asyncCheck relayer.start()
-  
+
   # Keep running and print stats periodically
   while relayer.running:
-    await sleepAsync(1000)  # Sleep 1 second
+    await sleepAsync(1000) # Sleep 1 second
     let (packets, bundles, dedupSize, queueSize) = relayer.getStats()
     if packets > 0:
-      echo "Stats: packets=", packets, " bundles=", bundles, " dedup=", dedupSize, " queue=", queueSize
+      echo "Stats: packets=",
+        packets, " bundles=", bundles, " dedup=", dedupSize, " queue=", queueSize
 
 proc main() =
   var
-    tpuPort = Port(8001)  # Default TPU port
+    tpuPort = Port(8001) # Default TPU port
     blockEngineEndpoint = "block-engine.jito.wtf:443"
     testMode = false
-  
+
   # Parse command line arguments
   var p = initOptParser()
   for kind, key, val in p.getopt():
-    case kind:
+    case kind
     of cmdLongOption, cmdShortOption:
-      case key:
+      case key
       of "port", "p":
         tpuPort = Port(parseInt(val))
       of "block-engine", "b":
@@ -63,14 +64,14 @@ proc main() =
       discard
     of cmdEnd:
       discard
-  
+
   if testMode:
     # Phase 1 test mode
     echo "=========================================="
     echo "Nimlana - Phase 1 Test Mode"
     echo "=========================================="
     echo ""
-    
+
     # Get shim version
     let version = nito_shim_version()
     if version != nil:
@@ -78,36 +79,36 @@ proc main() =
     else:
       echo "✗ Failed to load Rust shim"
       return
-    
+
     # Test hash computation
     let testData = "nimlana"
     let computedHash = computeHash(testData.toOpenArrayByte(0, testData.high))
     echo "✓ Hash computed: ", types.toHex(computedHash)
-    
+
     echo ""
     echo "Phase 1 tests complete!"
     return
-  
+
   # Phase 2: Start the relayer
   echo "=========================================="
   echo "Nimlana - Hyper-Fast MEV Relayer"
   echo "Phase 2: The 'Speed Demon' Relayer"
   echo "=========================================="
   echo ""
-  
+
   # Verify shim is loaded
   let version = nito_shim_version()
   if version == nil:
     echo "✗ Failed to load Rust shim"
     echo "  Make sure to run 'make shim' first to build the library"
     quit(1)
-  
+
   echo "✓ Rust shim loaded: ", $version
   echo ""
-  
+
   # Create and start relayer
   gRelayer = newRelayer(tpuPort, blockEngineEndpoint)
-  
+
   # Set up signal handlers for graceful shutdown
   proc signalHandler() {.noconv.} =
     echo ""
@@ -122,9 +123,9 @@ proc main() =
       echo "  Deduplication set size: ", dedupSize
       echo "  Queue size: ", queueSize
     quit(0)
-  
+
   setControlCHook(signalHandler)
-  
+
   # Start the relayer
   try:
     asyncCheck runRelayer(gRelayer)
@@ -138,4 +139,3 @@ proc main() =
 
 when isMainModule:
   main()
-

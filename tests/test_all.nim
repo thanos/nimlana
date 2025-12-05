@@ -1,6 +1,7 @@
 ## Test suite for Nimlana
 
 import unittest
+import std/strutils
 import ../src/nimlana/types
 import ../src/nimlana/ffi
 import ../src/nimlana/borsh
@@ -39,6 +40,43 @@ suite "Basic Types":
     bytes[0] = 0x01
     let pk3 = pubkeyFromBytes(bytes)
     check pk1 != pk3
+  
+  test "Pubkey string representation":
+    var pk: Pubkey = zeroPubkey()
+    pk[0] = 0xAA
+    # Use toHex directly to avoid ambiguity
+    let hexStr = toHex(pk)
+    check hexStr.len == 64  # 32 bytes * 2 hex chars
+    check hexStr.startsWith("AA") or hexStr.contains("AA")
+  
+  test "Hash string representation":
+    var h: Hash = zeroHash()
+    h[0] = 0xBB
+    # Use toHex directly to avoid ambiguity
+    let hexStr = toHex(h)
+    check hexStr.len == 64  # 32 bytes * 2 hex chars
+    check hexStr.startsWith("BB") or hexStr.contains("BB")
+  
+  test "toHex function":
+    let data: seq[byte] = @[0x00.byte, 0xFF.byte, 0x12.byte, 0xAB.byte]
+    let hex = toHex(data)
+    check hex == "00FF12AB"
+    
+    # Test empty
+    check toHex(@[]) == ""
+    
+    # Test single byte
+    check toHex(@[0x0A.byte]) == "0A"
+  
+  test "Hash equality":
+    let h1 = zeroHash()
+    let h2 = zeroHash()
+    check h1 == h2
+    
+    var bytes: array[32, byte]
+    bytes[0] = 0x01
+    let h3 = hashFromBytes(bytes)
+    check h1 != h3
 
 suite "Borsh Serialization":
   test "Serialize u8":
@@ -47,6 +85,10 @@ suite "Borsh Serialization":
     check serialized.len == 1
     check serialized[0] == 42
   
+  test "Serialize u8 edge cases":
+    check borshSerializeU8(0.uint8)[0] == 0
+    check borshSerializeU8(255.uint8)[0] == 255
+  
   test "Serialize u32":
     let value = 0x12345678.uint32
     let serialized = borshSerializeU32(value)
@@ -54,6 +96,30 @@ suite "Borsh Serialization":
     # Check little-endian
     check serialized[0] == 0x78
     check serialized[3] == 0x12
+  
+  test "Serialize u32 edge cases":
+    check borshSerializeU32(0.uint32).len == 4
+    check borshSerializeU32(0xFFFFFFFF'u32).len == 4
+    # Verify all bytes are zero for 0
+    let zero = borshSerializeU32(0.uint32)
+    for b in zero:
+      check b == 0
+  
+  test "Serialize u64":
+    let value = 0x0123456789ABCDEF'u64
+    let serialized = borshSerializeU64(value)
+    check serialized.len == 8
+    # Check little-endian
+    check serialized[0] == 0xEF
+    check serialized[7] == 0x01
+  
+  test "Serialize u64 edge cases":
+    check borshSerializeU64(0.uint64).len == 8
+    check borshSerializeU64(0xFFFFFFFFFFFFFFFF'u64).len == 8
+    # Verify all bytes are zero for 0
+    let zero = borshSerializeU64(0.uint64)
+    for b in zero:
+      check b == 0
   
   test "Serialize string":
     let s = "hello"
@@ -64,6 +130,15 @@ suite "Borsh Serialization":
     check deserialized == s
     check offset == serialized.len
   
+  test "Serialize empty string":
+    let s = ""
+    let serialized = borshSerializeString(s)
+    check serialized.len == 4  # Only length, no data
+    var offset = 0
+    let deserialized = borshDeserializeString(serialized, offset)
+    check deserialized == s
+    check deserialized.len == 0
+  
   test "Serialize Pubkey":
     var pk = zeroPubkey()
     pk[0] = 0xAA
@@ -73,6 +148,39 @@ suite "Borsh Serialization":
     var offset = 0
     let deserialized = borshDeserializePubkey(serialized, offset)
     check deserialized == pk
+  
+  test "Serialize Hash":
+    var h = zeroHash()
+    h[0] = 0xBB
+    h[31] = 0xCC
+    let serialized = borshSerializeHash(h)
+    check serialized.len == 32
+    check serialized[0] == 0xBB
+    check serialized[31] == 0xCC
+    var offset = 0
+    let deserialized = borshDeserializeHash(serialized, offset)
+    check deserialized == h
+  
+  test "Round-trip u8":
+    let original = 123.uint8
+    let serialized = borshSerializeU8(original)
+    var offset = 0
+    let deserialized = borshDeserializeU8(serialized, offset)
+    check deserialized == original
+  
+  test "Round-trip u32":
+    let original = 0xDEADBEEF'u32
+    let serialized = borshSerializeU32(original)
+    var offset = 0
+    let deserialized = borshDeserializeU32(serialized, offset)
+    check deserialized == original
+  
+  test "Round-trip u64":
+    let original = 0x0123456789ABCDEF'u64
+    let serialized = borshSerializeU64(original)
+    var offset = 0
+    let deserialized = borshDeserializeU64(serialized, offset)
+    check deserialized == original
 
 suite "Buffer Management":
   test "SharedBuffer creation":

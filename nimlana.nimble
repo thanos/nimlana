@@ -20,6 +20,13 @@ requires "protobuf >= 0.5.0"
 task test, "Run tests":
   exec "nim c -r tests/test_all.nim"
 
+task test_coverage, "Run coverage tests":
+  exec "nim c -r tests/test_coverage.nim"
+
+task test_all, "Run all tests (basic + coverage)":
+  exec "nim c -r tests/test_all.nim"
+  exec "nim c -r tests/test_coverage.nim"
+
 task build_shim, "Build the Rust shim library":
   exec "cd shim && cargo build --release"
 

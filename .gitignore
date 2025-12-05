@@ -30,3 +30,12 @@ Thumbs.db
 *.so
 *.dylib
 *.a
+*.dSYM
+*.dSYM/
+
+# Coverage reports
+coverage/
+lcov.info
+*.gcda
+*.gcno
+*.gcov

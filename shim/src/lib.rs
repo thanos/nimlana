@@ -4,9 +4,20 @@
 //! All functions must be panic-safe (catch_unwind) to prevent unwinding across FFI boundary
 
 use std::panic;
-use std::ffi::{c_char, c_int, c_void};
-use std::ptr;
+use std::ffi::{c_char, c_int};
 use std::slice;
+
+/// Solana Pubkey (32 bytes)
+#[repr(C)]
+pub struct Pubkey {
+    pub bytes: [u8; 32],
+}
+
+/// Solana Hash (32 bytes, SHA-256)
+#[repr(C)]
+pub struct Hash {
+    pub bytes: [u8; 32],
+}
 
 /// Error codes returned to Nim
 #[repr(C)]
@@ -53,10 +64,10 @@ pub extern "C" fn verify_ed25519(
         let sig = unsafe { slice::from_raw_parts(sig_ptr, 64) };
         let pubkey = unsafe { slice::from_raw_parts(pubkey_ptr, 32) };
 
-        // Use ed25519-dalek for verification
-        use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+        // Use ed25519-dalek v1.0 for verification
+        use ed25519_dalek::{PublicKey, Signature, Verifier};
 
-        let verifying_key = match VerifyingKey::from_bytes(pubkey.try_into().unwrap()) {
+        let public_key = match PublicKey::from_bytes(pubkey) {
             Ok(key) => key,
             Err(_) => {
                 return VerifyResult {
@@ -66,7 +77,7 @@ pub extern "C" fn verify_ed25519(
             }
         };
 
-        let signature = match Signature::from_bytes(sig.try_into().unwrap()) {
+        let signature = match Signature::from_bytes(sig) {
             Ok(sig) => sig,
             Err(_) => {
                 return VerifyResult {
@@ -76,7 +87,7 @@ pub extern "C" fn verify_ed25519(
             }
         };
 
-        match verifying_key.verify(msg, &signature) {
+        match public_key.verify(msg, &signature) {
             Ok(_) => VerifyResult {
                 success: 1,
                 error_code: NitoError::Success,
@@ -101,5 +112,74 @@ pub extern "C" fn verify_ed25519(
 #[no_mangle]
 pub extern "C" fn nito_shim_version() -> *const c_char {
     b"nito_shim 0.1.0\0".as_ptr() as *const c_char
+}
+
+/// Create a zero-initialized Pubkey
+#[no_mangle]
+pub extern "C" fn pubkey_zero() -> Pubkey {
+    Pubkey { bytes: [0u8; 32] }
+}
+
+/// Create a Pubkey from bytes
+///
+/// # Safety
+/// pubkey_bytes must point to a valid 32-byte array
+#[no_mangle]
+pub extern "C" fn pubkey_from_bytes(pubkey_bytes: *const u8) -> Pubkey {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        if pubkey_bytes.is_null() {
+            return Pubkey { bytes: [0u8; 32] };
+        }
+        let bytes = unsafe { slice::from_raw_parts(pubkey_bytes, 32) };
+        let mut pubkey = Pubkey { bytes: [0u8; 32] };
+        pubkey.bytes.copy_from_slice(bytes);
+        pubkey
+    }));
+    result.unwrap_or_else(|_| Pubkey { bytes: [0u8; 32] })
+}
+
+/// Compare two Pubkeys for equality
+#[no_mangle]
+pub extern "C" fn pubkey_eq(a: *const Pubkey, b: *const Pubkey) -> c_int {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        if a.is_null() || b.is_null() {
+            return 0;
+        }
+        let a_bytes = unsafe { &(*a).bytes };
+        let b_bytes = unsafe { &(*b).bytes };
+        if a_bytes == b_bytes { 1 } else { 0 }
+    }));
+    result.unwrap_or(0)
+}
+
+/// Create a zero-initialized Hash
+#[no_mangle]
+pub extern "C" fn hash_zero() -> Hash {
+    Hash { bytes: [0u8; 32] }
+}
+
+/// Compute SHA-256 hash of data
+///
+/// # Safety
+/// data_ptr must point to a valid buffer of data_len bytes
+/// out_hash must point to a valid Hash struct
+#[no_mangle]
+pub extern "C" fn hash_sha256(data_ptr: *const u8, data_len: usize, out_hash: *mut Hash) -> c_int {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        if data_ptr.is_null() || out_hash.is_null() {
+            return 0;
+        }
+        let data = unsafe { slice::from_raw_parts(data_ptr, data_len) };
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(data);
+        let hash_bytes = hasher.finalize();
+        
+        unsafe {
+            (*out_hash).bytes.copy_from_slice(&hash_bytes);
+        }
+        1
+    }));
+    result.unwrap_or(0)
 }
 

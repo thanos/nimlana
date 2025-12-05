@@ -427,4 +427,3 @@ suite "Edge Cases":
 
     check ingestor.packetCount == 100
     check ingestor.dedupSet.card == 100
-

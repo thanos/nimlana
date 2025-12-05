@@ -201,4 +201,3 @@ suite "Error Edge Cases":
       inc errorCount
 
     check errorCount == 4
-

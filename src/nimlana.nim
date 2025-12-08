@@ -3,6 +3,7 @@
 
 import std/strutils
 import std/parseopt
+import std/os
 import chronos
 import nimcrypto
 import nimlana/types
@@ -25,7 +26,7 @@ proc runRelayer(relayer: Relayer) {.async.} =
 
   # Keep running and print stats periodically
   while relayer.running:
-    await sleepAsync(1000) # Sleep 1 second
+    await sleepAsync(milliseconds(1000)) # Sleep 1 second
     let (packets, bundles, dedupSize, queueSize) = relayer.getStats()
     if packets > 0:
       echo "Stats: packets=",
@@ -129,8 +130,10 @@ proc main() =
   # Start the relayer
   try:
     asyncCheck runRelayer(gRelayer)
-    # Run event loop
-    runForever()
+    # Keep main thread alive - the async tasks run in background
+    # The signal handler will stop the relayer and quit
+    while gRelayer.running:
+      sleep(100) # Sleep 100ms to avoid busy-waiting
   except Exception as e:
     echo "Error: ", e.msg
     if gRelayer != nil:

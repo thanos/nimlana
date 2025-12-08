@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  nimlana:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nimlana-test
+    network_mode: host
+    volumes:
+      - .:/app
+      - nimlana-cache:/root/.nimble
+      - rust-cache:/root/.cargo
+    environment:
+      - NIMBLE_DIR=/root/.nimble
+      - CARGO_HOME=/root/.cargo
+    command: make test-integration-docker
+
+  # Mock gRPC server for testing
+  grpc-mock:
+    image: grpcbin/grpcbin:latest
+    container_name: grpc-mock-server
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - nimlana-network
+
+networks:
+  nimlana-network:
+    driver: bridge
+
+volumes:
+  nimlana-cache:
+  rust-cache:
+

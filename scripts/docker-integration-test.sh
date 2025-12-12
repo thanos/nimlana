@@ -56,3 +56,5 @@ docker run --rm nimlana:latest nim c -d:useFullGrpc -r tests/test_integration_gr
 echo ""
 echo "=== All integration tests completed ==="
 
+
+

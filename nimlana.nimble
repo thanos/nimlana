@@ -54,6 +54,9 @@ task test_relayer_mock, "Run relayer.nim mock tests":
 task test_tpu_mock, "Run tpu.nim mock tests":
   exec "nim c -r tests/test_tpu_mock.nim"
 
+task test_simulation, "Run bundle simulation tests":
+  exec "nim c -r tests/test_simulation.nim"
+
 task test_all, "Run all tests (basic + coverage + new functionality)":
   exec "nim c -r tests/test_all.nim"
   exec "nim c -r tests/test_coverage.nim"
@@ -67,6 +70,7 @@ task test_all, "Run all tests (basic + coverage + new functionality)":
   exec "nim c -r tests/test_tpu_coverage.nim"
   exec "nim c -r tests/test_relayer_mock.nim"
   exec "nim c -r tests/test_tpu_mock.nim"
+  exec "nim c -r tests/test_simulation.nim"
 
 task build_shim, "Build the Rust shim library":
   exec "cd shim && cargo build --release"

@@ -29,3 +29,5 @@ docker run --rm nimlana:latest nim c -r tests/test_integration_tip_payment.nim
 echo ""
 echo "=== All integration tests completed ==="
 
+
+

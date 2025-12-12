@@ -30,7 +30,7 @@ The node is split into two memory spaces:
 
 ## Development Phases
 
-### Phase 1: Foundation & FFI Bridge (Weeks 1-8) ✅ Complete
+### Phase 1: Foundation & FFI Bridge (Weeks 1-8) - Complete
 
 - [x] Project structure
 - [x] Rust shim crate (`nito_shim`)

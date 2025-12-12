@@ -151,3 +151,5 @@ suite "Block Engine Integration Mock":
     check bundle.transactions[1].len == 2
     check bundle.tipAccount.len == 32 # Pubkey is 32 bytes
     check bundle.tipAmount > 0
+
+

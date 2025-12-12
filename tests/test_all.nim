@@ -11,14 +11,14 @@ import test_ed25519_vectors
 
 suite "Basic Types":
   test "Pubkey creation":
-    let pk = zeroPubkey()
+    let pk = types.zeroPubkey()
     check pk.len == 32
     # Check all bytes are zero
     for b in pk:
       check b == 0
 
   test "Hash creation":
-    let h = zeroHash()
+    let h = types.zeroHash()
     check h.len == 32
     for b in h:
       check b == 0
@@ -32,8 +32,8 @@ suite "Basic Types":
     check pk[31] == 0xFF
 
   test "Pubkey equality":
-    let pk1 = zeroPubkey()
-    let pk2 = zeroPubkey()
+    let pk1 = types.zeroPubkey()
+    let pk2 = types.zeroPubkey()
     check pk1 == pk2
 
     var bytes: array[32, byte]
@@ -42,7 +42,7 @@ suite "Basic Types":
     check pk1 != pk3
 
   test "Pubkey string representation":
-    var pk: Pubkey = zeroPubkey()
+    var pk: Pubkey = types.zeroPubkey()
     pk[0] = 0xAA
     # Use toHex directly to avoid ambiguity
     let hexStr = toHex(pk)
@@ -50,7 +50,7 @@ suite "Basic Types":
     check hexStr.startsWith("AA") or hexStr.contains("AA")
 
   test "Hash string representation":
-    var h: Hash = zeroHash()
+    var h: Hash = types.zeroHash()
     h[0] = 0xBB
     # Use toHex directly to avoid ambiguity
     let hexStr = toHex(h)
@@ -69,8 +69,8 @@ suite "Basic Types":
     check toHex(@[0x0A.byte]) == "0A"
 
   test "Hash equality":
-    let h1 = zeroHash()
-    let h2 = zeroHash()
+    let h1 = types.zeroHash()
+    let h2 = types.zeroHash()
     check h1 == h2
 
     var bytes: array[32, byte]
@@ -140,7 +140,7 @@ suite "Borsh Serialization":
     check deserialized.len == 0
 
   test "Serialize Pubkey":
-    var pk = zeroPubkey()
+    var pk = types.zeroPubkey()
     pk[0] = 0xAA
     let serialized = borshSerializePubkey(pk)
     check serialized.len == 32
@@ -150,7 +150,7 @@ suite "Borsh Serialization":
     check deserialized == pk
 
   test "Serialize Hash":
-    var h = zeroHash()
+    var h = types.zeroHash()
     h[0] = 0xBB
     h[31] = 0xCC
     let serialized = borshSerializeHash(h)

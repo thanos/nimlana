@@ -119,3 +119,4 @@ suite "Gossip Module":
     check stats.pushMessagesSent == 0
     check stats.valuesInserted == 0
 
+

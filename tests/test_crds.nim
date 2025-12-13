@@ -10,18 +10,35 @@ suite "CRDS Data Structures":
   test "Create ContactInfo":
     var contactInfo = ContactInfo(
       id: types.zeroPubkey(),
+      gossip: newSocketAddr("127.0.0.1", 8001'u16),
+      tvu: newSocketAddr("127.0.0.1", 8002'u16),
+      tpu: newSocketAddr("127.0.0.1", 8003'u16),
+      tpuForwards: newSocketAddr("127.0.0.1", 8004'u16),
+      tpuVote: newSocketAddr("127.0.0.1", 8005'u16),
+      rpc: newSocketAddr("127.0.0.1", 8006'u16),
+      rpcPubsub: newSocketAddr("127.0.0.1", 8007'u16),
+      serveRepair: newSocketAddr("127.0.0.1", 8008'u16),
       wallclock: 1234567890'u64,
       shredVersion: 12345'u16
     )
     contactInfo.id[0] = 0x01
     
     check contactInfo.id[0] == 0x01
+    check contactInfo.gossip.port == 8001'u16
     check contactInfo.wallclock == 1234567890'u64
     check contactInfo.shredVersion == 12345'u16
 
   test "Serialize and deserialize ContactInfo":
     var contactInfo = ContactInfo(
       id: types.zeroPubkey(),
+      gossip: newSocketAddr("127.0.0.1", 8001'u16),
+      tvu: newSocketAddr("127.0.0.1", 8002'u16),
+      tpu: newSocketAddr("127.0.0.1", 8003'u16),
+      tpuForwards: newSocketAddr("127.0.0.1", 8004'u16),
+      tpuVote: newSocketAddr("127.0.0.1", 8005'u16),
+      rpc: newSocketAddr("127.0.0.1", 8006'u16),
+      rpcPubsub: newSocketAddr("127.0.0.1", 8007'u16),
+      serveRepair: newSocketAddr("127.0.0.1", 8008'u16),
       wallclock: 1234567890'u64,
       shredVersion: 12345'u16
     )
@@ -33,6 +50,9 @@ suite "CRDS Data Structures":
     var offset = 0
     let deserialized = deserializeContactInfo(serialized, offset)
     check deserialized.id[0] == 0x01
+    check deserialized.gossip.port == 8001'u16
+    check deserialized.tvu.port == 8002'u16
+    check deserialized.tpu.port == 8003'u16
     check deserialized.wallclock == 1234567890'u64
     check deserialized.shredVersion == 12345'u16
 

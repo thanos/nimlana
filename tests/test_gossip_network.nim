@@ -104,3 +104,4 @@ suite "Gossip Network":
     network.cleanupStalePeers(100'u64)  # Max age 100 seconds
     check network.peers.len == 0
 
+

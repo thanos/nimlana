@@ -121,3 +121,123 @@ suite "CRDS Data Structures":
     check not isValid
     check "zero pubkey" in errorMsg or "no slots" in errorMsg
 
+  test "Serialize and deserialize EpochSlots":
+    var epochSlots = EpochSlots()
+    epochSlots.fromPubkey = types.zeroPubkey()
+    epochSlots.fromPubkey[0] = 0x03
+    epochSlots.slots = @[100'u64, 101'u64, 102'u64]
+    epochSlots.wallclock = 1234567890'u64
+    
+    let serialized = serializeEpochSlots(epochSlots)
+    check serialized.len > 0
+    
+    var offset = 0
+    let deserialized = deserializeEpochSlots(serialized, offset)
+    check deserialized.fromPubkey[0] == 0x03
+    check deserialized.slots.len == 3
+    check deserialized.slots[0] == 100'u64
+    check deserialized.wallclock == 1234567890'u64
+
+  test "Serialize and deserialize LegacyVersion":
+    var legacyVersion = LegacyVersion()
+    legacyVersion.fromPubkey = types.zeroPubkey()
+    legacyVersion.fromPubkey[0] = 0x04
+    legacyVersion.version = 12345'u32
+    legacyVersion.wallclock = 1234567890'u64
+    
+    let serialized = serializeLegacyVersion(legacyVersion)
+    check serialized.len > 0
+    
+    var offset = 0
+    let deserialized = deserializeLegacyVersion(serialized, offset)
+    check deserialized.fromPubkey[0] == 0x04
+    check deserialized.version == 12345'u32
+    check deserialized.wallclock == 1234567890'u64
+
+  test "Serialize and deserialize LegacyContactInfo":
+    var legacyContactInfo = LegacyContactInfo()
+    legacyContactInfo.id = types.zeroPubkey()
+    legacyContactInfo.id[0] = 0x05
+    legacyContactInfo.wallclock = 1234567890'u64
+    
+    let serialized = serializeLegacyContactInfo(legacyContactInfo)
+    check serialized.len > 0
+    
+    var offset = 0
+    let deserialized = deserializeLegacyContactInfo(serialized, offset)
+    check deserialized.id[0] == 0x05
+    check deserialized.wallclock == 1234567890'u64
+
+  test "Serialize and deserialize CrdsValue (EpochSlots)":
+    var value = CrdsValue(kind: CrdsEpochSlots)
+    value.epochSlots.fromPubkey = types.zeroPubkey()
+    value.epochSlots.fromPubkey[0] = 0x03
+    value.epochSlots.slots = @[100'u64, 101'u64]
+    value.epochSlots.wallclock = 1234567890'u64
+    
+    let serialized = serializeCrdsValue(value)
+    check serialized.len > 0
+    
+    var offset = 0
+    let deserialized = deserializeCrdsValue(serialized, offset)
+    check deserialized.kind == CrdsEpochSlots
+    check deserialized.epochSlots.fromPubkey[0] == 0x03
+    check deserialized.epochSlots.slots.len == 2
+
+  test "Serialize and deserialize CrdsValue (LegacyVersion)":
+    var value = CrdsValue(kind: CrdsLegacyVersion)
+    value.legacyVersion.fromPubkey = types.zeroPubkey()
+    value.legacyVersion.fromPubkey[0] = 0x04
+    value.legacyVersion.version = 12345'u32
+    value.legacyVersion.wallclock = 1234567890'u64
+    
+    let serialized = serializeCrdsValue(value)
+    check serialized.len > 0
+    
+    var offset = 0
+    let deserialized = deserializeCrdsValue(serialized, offset)
+    check deserialized.kind == CrdsLegacyVersion
+    check deserialized.legacyVersion.fromPubkey[0] == 0x04
+    check deserialized.legacyVersion.version == 12345'u32
+
+  test "Serialize and deserialize CrdsValue (LegacyContactInfo)":
+    var value = CrdsValue(kind: CrdsLegacyContactInfo)
+    value.legacyContactInfo.id = types.zeroPubkey()
+    value.legacyContactInfo.id[0] = 0x05
+    value.legacyContactInfo.wallclock = 1234567890'u64
+    
+    let serialized = serializeCrdsValue(value)
+    check serialized.len > 0
+    
+    var offset = 0
+    let deserialized = deserializeCrdsValue(serialized, offset)
+    check deserialized.kind == CrdsLegacyContactInfo
+    check deserialized.legacyContactInfo.id[0] == 0x05
+
+  test "Validate CrdsValue (EpochSlots)":
+    var value = CrdsValue(kind: CrdsEpochSlots)
+    value.epochSlots.fromPubkey = types.zeroPubkey()  # Invalid: zero pubkey
+    value.epochSlots.slots = @[]  # Invalid: no slots
+    
+    let (isValid, errorMsg) = validateCrdsValue(value)
+    check not isValid
+    check "zero pubkey" in errorMsg or "no slots" in errorMsg
+
+  test "Validate CrdsValue (LegacyVersion)":
+    var value = CrdsValue(kind: CrdsLegacyVersion)
+    value.legacyVersion.fromPubkey = types.zeroPubkey()  # Invalid: zero pubkey
+    value.legacyVersion.wallclock = 0'u64  # Invalid: zero wallclock
+    
+    let (isValid, errorMsg) = validateCrdsValue(value)
+    check not isValid
+    check "zero pubkey" in errorMsg or "zero wallclock" in errorMsg
+
+  test "Validate CrdsValue (LegacyContactInfo)":
+    var value = CrdsValue(kind: CrdsLegacyContactInfo)
+    value.legacyContactInfo.id = types.zeroPubkey()  # Invalid: zero pubkey
+    value.legacyContactInfo.wallclock = 0'u64  # Invalid: zero wallclock
+    
+    let (isValid, errorMsg) = validateCrdsValue(value)
+    check not isValid
+    check "zero pubkey" in errorMsg or "zero wallclock" in errorMsg
+

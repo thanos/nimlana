@@ -189,3 +189,87 @@ pub extern "C" fn hash_sha256(data_ptr: *const u8, data_len: usize, out_hash: *m
     result.unwrap_or(0)
 }
 
+/// Account state information
+#[repr(C)]
+pub struct AccountState {
+    pub exists: c_int,      // 1 if account exists, 0 otherwise
+    pub lamports: u64,      // Account balance in lamports
+    pub owner: Pubkey,      // Account owner (program ID)
+    pub executable: c_int,  // 1 if executable, 0 otherwise
+    pub rent_epoch: u64,    // Rent epoch
+}
+
+/// Get account balance from ledger state
+///
+/// # Safety
+/// pubkey_ptr must point to a valid 32-byte Pubkey
+/// 
+/// Note: This is a placeholder implementation. In production, this would
+/// query the actual ledger state via Solana SDK. For now, returns 0.
+#[no_mangle]
+pub extern "C" fn get_account_balance(pubkey_ptr: *const Pubkey) -> u64 {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        if pubkey_ptr.is_null() {
+            return 0u64;
+        }
+        
+        // TODO: In production, query actual ledger state
+        // For now, return 0 (account not found or zero balance)
+        // This will be replaced with real ledger access in Phase 4
+        0u64
+    }));
+    result.unwrap_or(0u64)
+}
+
+/// Check if an account exists in ledger state
+///
+/// # Safety
+/// pubkey_ptr must point to a valid 32-byte Pubkey
+///
+/// Note: This is a placeholder implementation. In production, this would
+/// query the actual ledger state via Solana SDK. For now, returns 0 (does not exist).
+#[no_mangle]
+pub extern "C" fn account_exists(pubkey_ptr: *const Pubkey) -> c_int {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        if pubkey_ptr.is_null() {
+            return 0;
+        }
+        
+        // TODO: In production, query actual ledger state
+        // For now, return 0 (account does not exist)
+        // This will be replaced with real ledger access in Phase 4
+        0
+    }));
+    result.unwrap_or(0)
+}
+
+/// Get full account state from ledger
+///
+/// # Safety
+/// pubkey_ptr must point to a valid 32-byte Pubkey
+/// out_state must point to a valid AccountState struct
+///
+/// Note: This is a placeholder implementation. In production, this would
+/// query the actual ledger state via Solana SDK. For now, returns 0 (not found).
+#[no_mangle]
+pub extern "C" fn get_account_state(pubkey_ptr: *const Pubkey, out_state: *mut AccountState) -> c_int {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        if pubkey_ptr.is_null() || out_state.is_null() {
+            return 0;
+        }
+        
+        // TODO: In production, query actual ledger state
+        // For now, set exists to 0 (account not found)
+        unsafe {
+            (*out_state).exists = 0;
+            (*out_state).lamports = 0;
+            (*out_state).owner = Pubkey { bytes: [0u8; 32] };
+            (*out_state).executable = 0;
+            (*out_state).rent_epoch = 0;
+        }
+        
+        0 // Account not found
+    }));
+    result.unwrap_or(0)
+}
+

@@ -190,7 +190,7 @@ suite "Block Engine Client Coverage":
   test "Bundle creation":
     var bundle = Bundle(
       transactions: @[@[0x01.byte, 0x02.byte]],
-      tipAccount: zeroPubkey(),
+      tipAccount: types.zeroPubkey(),
       tipAmount: 1000'u64,
     )
     check bundle.transactions.len == 1
@@ -526,7 +526,7 @@ suite "Types Edge Cases":
     check hex[510 .. 511] == "FF"
 
   test "Pubkey string representation format":
-    var pk: Pubkey = zeroPubkey()
+    var pk: Pubkey = types.zeroPubkey()
     pk[0] = 0x12
     pk[1] = 0x34
     # Test toHex directly
@@ -535,7 +535,7 @@ suite "Types Edge Cases":
     check hexStr.startsWith("1234") or hexStr.contains("1234")
 
   test "Hash string representation format":
-    var h: Hash = zeroHash()
+    var h: Hash = types.zeroHash()
     h[0] = 0xAB
     h[1] = 0xCD
     # Test toHex directly

@@ -10,13 +10,17 @@ include = [
     "NitoError", 
     "Pubkey",
     "Hash",
+    "AccountState",
     "verify_ed25519", 
     "nito_shim_version",
     "pubkey_zero",
     "pubkey_from_bytes",
     "pubkey_eq",
     "hash_zero",
-    "hash_sha256"
+    "hash_sha256",
+    "get_account_balance",
+    "account_exists",
+    "get_account_state"
 ]
 
 [export.rename]

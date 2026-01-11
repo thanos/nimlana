@@ -1,7 +1,7 @@
 **<img width="824" height="506" alt="nimlana" src="https://github.com/user-attachments/assets/f7ac038e-1747-4c21-97be-8412ed926a9a" />**
 # Project Nimlana
 
-**Hyper-Fast MEV Relayer and Validator client for Solana**
+**High-Performance MEV Relayer and Validator client for Solana**
 
 ## Overview
 
@@ -9,7 +9,7 @@ Nimlana is a high-performance MEV (Maximal Extractable Value) relayer and valida
 
 ### Core Advantages
 
-- **Latency**: Nim's `chronos` async engine provides deterministic latency profiles superior to Rust's `tokio` work-stealing jitter for UDP packet processing
+- **Latency**: Nim's `chronos` async engine provides deterministic latency profiles with reduced jitter compared to Rust's `tokio` work-stealing scheduler for UDP packet processing
 - **Architecture**: "Strangler Fig" pattern - starts as a high-performance network frontend that wraps the Solana Rust SDK, gradually replacing components
 - **Safety**: Zero-copy FFI bridge with panic-safe boundaries
 
@@ -44,7 +44,7 @@ The node is split into two memory spaces:
 - [x] Comprehensive test suite
 - [ ] Nim bindings with `futhark` (optional - manual bindings work)
 
-### Phase 2: The "Speed Demon" Relayer (Weeks 9-16)
+### Phase 2: TPU Relayer (Weeks 9-16)
 
 - TPU ingestor (UDP/QUIC)
 - Block Engine client (gRPC)

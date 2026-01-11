@@ -42,7 +42,7 @@ import nito_solana
 ## Notes
 
 - The generated bindings may need minor adjustments
-- Manual bindings in `src/nimlana/ffi.nim` work perfectly and are easier to customize
+- Manual bindings in `src/nimlana/ffi.nim` work well and are easier to customize
 - Futhark is most useful when the Rust shim has many functions
 
 ## Troubleshooting
@@ -51,6 +51,7 @@ If futhark fails:
 1. Ensure the C header exists: `shim/target/release/nito_shim.h`
 2. Check futhark version: `futhark --version`
 3. Manual bindings are always available as a fallback
+
 
 
 

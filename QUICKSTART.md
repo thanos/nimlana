@@ -51,7 +51,7 @@ nimlana/
 
 ## What's Working
 
-✅ **Phase 1 Foundation** is complete:
+Phase 1 Foundation is complete:
 - Rust shim crate with panic-safe FFI
 - Ed25519 signature verification function
 - Nim FFI bindings (manual, will be auto-generated later)

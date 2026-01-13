@@ -1,0 +1,26 @@
+# Docker ignore file
+.git
+.gitignore
+*.dSYM
+*.dSYM/
+coverage/
+lcov.info
+nimcache/
+*.o
+*.c
+*.exe
+*.dll
+*.so
+*.dylib
+target/
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+
+
+
+

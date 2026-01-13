@@ -4,7 +4,7 @@
 
 # Project Nimlana
 
-**Hyper-Fast MEV Relayer and Validator client for Solana**
+**High-Performance MEV Relayer and Validator client for Solana**
 
 ## Overview
 
@@ -12,7 +12,7 @@ Nimlana is a high-performance MEV (Maximal Extractable Value) relayer and valida
 
 ### Core Advantages
 
-- **Latency**: Nim's `chronos` async engine provides deterministic latency profiles superior to Rust's `tokio` work-stealing jitter for UDP packet processing
+- **Latency**: Nim's `chronos` async engine provides deterministic latency profiles with reduced jitter compared to Rust's `tokio` work-stealing scheduler for UDP packet processing
 - **Architecture**: "Strangler Fig" pattern - starts as a high-performance network frontend that wraps the Solana Rust SDK, gradually replacing components
 - **Safety**: Zero-copy FFI bridge with panic-safe boundaries
 
@@ -58,10 +58,14 @@ The node is split into two memory spaces:
 - Bundle simulation
 - Tip payment logic
 
-### Phase 4: Native Consolidation (Months 6+)
+### Phase 4: Native Consolidation (Months 6+) - 60% Complete
 
-- Native gossip (CRDS)
-- Ledger replay
+- Native gossip (CRDS) - Data structures, serialization, gossip table, network layer
+- Ledger replay - Not started
+- Block production - Not started
+- Vote handling - Not started
+
+**See `PRODUCTION_ROADMAP.md` for the complete path to production-ready validator.**
 
 ## Building
 
@@ -149,7 +153,29 @@ The Rust shim wraps every public function in `std::panic::catch_unwind`. If a pa
 
 Apache-2.0 (see LICENSE file)
 
+## Production Roadmap
+
+Nimlana is currently in **Phase 4 (60% complete)**. See the following documents for details:
+
+- **`PRODUCTION_ROADMAP.md`** - Complete 44-week roadmap to production
+- **`ROADMAP_SUMMARY.md`** - Quick overview and timeline
+- **`PHASE4_PLAN.md`** - Phase 4 detailed implementation plan
+- **`PHASE4_STATUS.md`** - Current status and progress
+- **`NEXT.md`** - Immediate next steps
+
+**Current Status:**
+- Phases 1-3: Complete (Foundation, TPU Relayer, Bundle Simulation)
+- Phase 4: 60% complete (Native Gossip - CRDS structures, table, network layer)
+- Phase 5-9: Not started (Ledger Replay, Block Production, Voting, RPC, Hardening, Deployment)
+
+**Next Steps:**
+1. Complete gossip protocol (signature verification, leader schedule) - 2-3 weeks
+2. Implement ledger replay - 8 weeks
+3. Add block production and voting - 8 weeks
+4. Add production infrastructure - 16 weeks
+5. Testnet and mainnet deployment - 8 weeks
+
 ## Contributing
 
-This is Phase 1 of the project. The foundation is being built to enable the high-performance relayer in Phase 2.
+This project is in active development. See `PRODUCTION_ROADMAP.md` for the development roadmap and current priorities.
 

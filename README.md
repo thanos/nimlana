@@ -33,7 +33,7 @@ The node is split into two memory spaces:
 
 ## Development Phases
 
-### Phase 1: Foundation & FFI Bridge (Weeks 1-8) ✅ Complete
+### Phase 1: Foundation & FFI Bridge  Complete
 
 - [x] Project structure
 - [x] Rust shim crate (`nito_shim`)
@@ -47,13 +47,13 @@ The node is split into two memory spaces:
 - [x] Comprehensive test suite
 - [ ] Nim bindings with `futhark` (optional - manual bindings work)
 
-### Phase 2: The "Speed Demon" Relayer (Weeks 9-16)
+### Phase 2: The "Speed Demon" Relayer 
 
 - TPU ingestor (UDP/QUIC)
 - Block Engine client (gRPC)
 - Deduplication logic
 
-### Phase 3: The Bundle Stage (Weeks 17-24)
+### Phase 3: The Bundle Stage 
 
 - Bundle simulation
 - Tip payment logic

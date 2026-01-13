@@ -1,4 +1,7 @@
-**<img width="824" height="506" alt="nimlana" src="https://github.com/user-attachments/assets/f7ac038e-1747-4c21-97be-8412ed926a9a" />**
+
+<img height="506" alt="nimlana" src="https://github.com/user-attachments/assets/3a79502c-c79e-4f35-9f12-f361ed7bf649" />
+
+
 # Project Nimlana
 
 **Hyper-Fast MEV Relayer and Validator client for Solana**

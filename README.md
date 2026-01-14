@@ -1,4 +1,7 @@
-**<img width="824" height="506" alt="nimlana" src="https://github.com/user-attachments/assets/f7ac038e-1747-4c21-97be-8412ed926a9a" />**
+
+<img height="506" alt="nimlana" src="https://github.com/user-attachments/assets/3a79502c-c79e-4f35-9f12-f361ed7bf649" />
+
+
 # Project Nimlana
 
 **High-Performance MEV Relayer and Validator client for Solana**
@@ -30,7 +33,7 @@ The node is split into two memory spaces:
 
 ## Development Phases
 
-### Phase 1: Foundation & FFI Bridge (Weeks 1-8) - Complete
+### Phase 1: Foundation & FFI Bridge  Complete
 
 - [x] Project structure
 - [x] Rust shim crate (`nito_shim`)
@@ -44,23 +47,23 @@ The node is split into two memory spaces:
 - [x] Comprehensive test suite
 - [ ] Nim bindings with `futhark` (optional - manual bindings work)
 
-### Phase 2: TPU Relayer (Weeks 9-16)
+### Phase 2: The "Speed Demon" Relayer 
 
 - TPU ingestor (UDP/QUIC)
 - Block Engine client (gRPC)
 - Deduplication logic
 
-### Phase 3: The Bundle Stage (Weeks 17-24)
+### Phase 3: The Bundle Stage 
 
 - Bundle simulation
 - Tip payment logic
 
 ### Phase 4: Native Consolidation (Months 6+) - 60% Complete
 
-- ✅ Native gossip (CRDS) - Data structures, serialization, gossip table, network layer
-- ❌ Ledger replay - Not started
-- ❌ Block production - Not started
-- ❌ Vote handling - Not started
+- Native gossip (CRDS) - Data structures, serialization, gossip table, network layer
+- Ledger replay - Not started
+- Block production - Not started
+- Vote handling - Not started
 
 **See `PRODUCTION_ROADMAP.md` for the complete path to production-ready validator.**
 
@@ -161,9 +164,9 @@ Nimlana is currently in **Phase 4 (60% complete)**. See the following documents 
 - **`NEXT.md`** - Immediate next steps
 
 **Current Status:**
-- ✅ Phases 1-3: Complete (Foundation, TPU Relayer, Bundle Simulation)
-- 🟡 Phase 4: 60% complete (Native Gossip - CRDS structures, table, network layer)
-- ⏳ Phase 5-9: Not started (Ledger Replay, Block Production, Voting, RPC, Hardening, Deployment)
+- Phases 1-3: Complete (Foundation, TPU Relayer, Bundle Simulation)
+- Phase 4: 60% complete (Native Gossip - CRDS structures, table, network layer)
+- Phase 5-9: Not started (Ledger Replay, Block Production, Voting, RPC, Hardening, Deployment)
 
 **Next Steps:**
 1. Complete gossip protocol (signature verification, leader schedule) - 2-3 weeks

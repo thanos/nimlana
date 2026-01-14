@@ -38,7 +38,7 @@ This document provides a comprehensive comparison between **Nimlana** (a Nim-bas
 | **Zero-Copy FFI** | Implemented | N/A | Nimlana: Zero-copy buffer management |
 | **Panic-Safe FFI** | Implemented | N/A | Nimlana: catch_unwind boundaries |
 | **Strangler Fig Pattern** | Planned | N/A | Nimlana: Gradual replacement of Rust components |
-| **Native Gossip (CRDS)** | Partial (Phase 4, 60-70%) | Full | Nimlana: Basic gossip protocol, missing pruning and some CRDS types. Jito: Complete gossip protocol |
+| **Native Gossip (CRDS)** | Partial (Phase 4, 85-90%) | Full | Nimlana: Complete CRDS types (11/11), pruning implemented. Jito: Complete gossip protocol |
 | **Ledger Replay** | Planned (Phase 4) | Full | Jito: Complete ledger state management |
 | **RocksDB Integration** | Planned | Full | Jito: Native RocksDB for ledger storage |
 

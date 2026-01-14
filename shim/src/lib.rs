@@ -68,9 +68,22 @@ pub extern "C" fn sign_ed25519(
         let secret_key_bytes = unsafe { slice::from_raw_parts(secret_key_ptr, 32) };
 
         // Use ed25519-dalek v1.0 for signing
-        use ed25519_dalek::{Signer, SigningKey};
-
-        let signing_key = match SigningKey::from_bytes(secret_key_bytes.try_into().unwrap()) {
+        // In v1.0, it's called Keypair, not SigningKey (SigningKey is v2.0+)
+        use ed25519_dalek::{Signer, Keypair, SecretKey, PublicKey};
+        
+        // In ed25519-dalek v1.0, we need to create a SecretKey first, then Keypair
+        // SecretKey::from_bytes expects a 32-byte array and returns a Result
+        let secret_key_array: [u8; 32] = match secret_key_bytes.try_into() {
+            Ok(arr) => arr,
+            Err(_) => {
+                return VerifyResult {
+                    success: 0,
+                    error_code: NitoError::InvalidInput,
+                };
+            }
+        };
+        
+        let secret_key = match SecretKey::from_bytes(&secret_key_array) {
             Ok(key) => key,
             Err(_) => {
                 return VerifyResult {
@@ -79,8 +92,12 @@ pub extern "C" fn sign_ed25519(
                 };
             }
         };
+        
+        // Create public key from secret key, then create keypair
+        let public_key = PublicKey::from(&secret_key);
+        let keypair = Keypair { secret: secret_key, public: public_key };
 
-        let signature = signing_key.sign(msg);
+        let signature = keypair.sign(msg);
         let sig_bytes = signature.to_bytes();
 
         // Write signature to output buffer

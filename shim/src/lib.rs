@@ -35,6 +35,75 @@ pub struct VerifyResult {
     pub error_code: NitoError,
 }
 
+/// Sign a message with Ed25519
+///
+/// # Safety
+/// This function is unsafe because it operates on raw pointers.
+/// The caller must ensure:
+/// - msg_ptr points to a valid buffer of msg_len bytes
+/// - secret_key_ptr points to a valid 32-byte secret key
+/// - out_sig_ptr points to a valid 64-byte buffer for the signature
+#[no_mangle]
+pub extern "C" fn sign_ed25519(
+    msg_ptr: *const u8,
+    msg_len: usize,
+    secret_key_ptr: *const u8,
+    out_sig_ptr: *mut u8,
+) -> VerifyResult {
+    let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        // Safety: We trust the caller to provide valid pointers
+        if (msg_len > 0 && msg_ptr.is_null()) || secret_key_ptr.is_null() || out_sig_ptr.is_null() {
+            return VerifyResult {
+                success: 0,
+                error_code: NitoError::InvalidInput,
+            };
+        }
+
+        // Handle empty message case
+        let msg = if msg_len == 0 {
+            &[]
+        } else {
+            unsafe { slice::from_raw_parts(msg_ptr, msg_len) }
+        };
+        let secret_key_bytes = unsafe { slice::from_raw_parts(secret_key_ptr, 32) };
+
+        // Use ed25519-dalek v1.0 for signing
+        use ed25519_dalek::{Signer, SigningKey};
+
+        let signing_key = match SigningKey::from_bytes(secret_key_bytes.try_into().unwrap()) {
+            Ok(key) => key,
+            Err(_) => {
+                return VerifyResult {
+                    success: 0,
+                    error_code: NitoError::InvalidInput,
+                };
+            }
+        };
+
+        let signature = signing_key.sign(msg);
+        let sig_bytes = signature.to_bytes();
+
+        // Write signature to output buffer
+        unsafe {
+            let out_slice = slice::from_raw_parts_mut(out_sig_ptr, 64);
+            out_slice.copy_from_slice(&sig_bytes);
+        }
+
+        VerifyResult {
+            success: 1,
+            error_code: NitoError::Success,
+        }
+    }));
+
+    match result {
+        Ok(sign_result) => sign_result,
+        Err(_) => VerifyResult {
+            success: 0,
+            error_code: NitoError::PanicCaught,
+        },
+    }
+}
+
 /// Verify an Ed25519 signature
 ///
 /// # Safety

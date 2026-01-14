@@ -11,6 +11,7 @@ include = [
     "Pubkey",
     "Hash",
     "AccountState",
+    "sign_ed25519",
     "verify_ed25519", 
     "nito_shim_version",
     "pubkey_zero",

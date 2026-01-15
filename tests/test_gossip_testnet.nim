@@ -8,11 +8,14 @@ import std/strutils
 import std/options
 import std/times
 import std/os
+import std/json
+import std/tables
 import ../src/nimlana/types
 import ../src/nimlana/crds
 import ../src/nimlana/gossip
 import ../src/nimlana/gossip_protocol
 import ../src/nimlana/testnet_rpc
+import ../src/nimlana/base58
 
 # Testnet configuration
 const TESTNET_GOSSIP_PORT = Port(8001)
@@ -30,8 +33,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Discover testnet validators via RPC":
     ## Test discovering testnet validators using RPC
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     let rpcClient = newTestnetRpcClient(TESTNET_RPC_ENDPOINT)
     let validators = rpcClient.getTestnetValidators()
@@ -49,16 +52,16 @@ suite "Gossip Protocol Testnet Integration":
   test "Connect to testnet validator":
     ## Test connecting to a testnet validator and receiving gossip messages
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     # Discover validators
     let rpcClient = newTestnetRpcClient(TESTNET_RPC_ENDPOINT)
     let validators = rpcClient.getTestnetValidators()
     
     if validators.len == 0:
-      skip("No testnet validators discovered")
-      return
+      echo "Skipping: no testnet validators discovered"
+      skip()
     
     var localPubkey = types.zeroPubkey()
     localPubkey[0] = 0x01
@@ -66,12 +69,19 @@ suite "Gossip Protocol Testnet Integration":
     let config = defaultGossipConfig(TESTNET_GOSSIP_PORT)
     let gossip = newGossip(localPubkey, config)
     
-    # Add first validator as peer (use placeholder pubkey since we don't have the actual pubkey format)
-    let (host, port, _) = validators[0]
+    # Get validators with actual pubkeys
+    let validatorsWithPubkeys = rpcClient.getTestnetValidatorsWithPubkeys()
+    
+    if validatorsWithPubkeys.len == 0:
+      echo "Skipping: no validators with valid pubkeys found"
+      skip()
+    
+    # Add first validator as peer with actual pubkey
+    let (host, port, validatorPubkey) = validatorsWithPubkeys[0]
     let address = initTAddress(host, port)
-    var validatorPubkey = types.zeroPubkey()
-    validatorPubkey[0] = 0x02
     gossip.addPeer(validatorPubkey, address)
+    
+    echo "Using validator pubkey: ", pubkeyToBase58(validatorPubkey)
     
     echo "Connecting to testnet validator: ", host, ":", port
     
@@ -79,7 +89,7 @@ suite "Gossip Protocol Testnet Integration":
     waitFor gossip.start()
     
     # Wait for messages (timeout after 30 seconds)
-    await sleepAsync(milliseconds(30000))
+    waitFor sleepAsync(30000)
     
     # Check if we received any messages
     let (stats, totalPeers, healthyPeers, tableSize) = gossip.getStats()
@@ -95,8 +105,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Verify message format compliance":
     ## Test that our messages are in the correct format for Solana gossip protocol
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     # Create a test message
     var localPubkey = types.zeroPubkey()
@@ -144,8 +154,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Get current slot from testnet":
     ## Test getting current slot from testnet RPC
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     let rpcClient = newTestnetRpcClient(TESTNET_RPC_ENDPOINT)
     let slot = rpcClient.getSlot()
@@ -161,8 +171,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Get epoch info from testnet":
     ## Test getting epoch information from testnet RPC
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     let rpcClient = newTestnetRpcClient(TESTNET_RPC_ENDPOINT)
     let epochInfo = rpcClient.getEpochInfo()
@@ -179,8 +189,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Handle network partition recovery":
     ## Test that gossip recovers from network partitions
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     var localPubkey = types.zeroPubkey()
     localPubkey[0] = 0x01
@@ -192,7 +202,7 @@ suite "Gossip Protocol Testnet Integration":
     
     # Simulate network partition (disconnect)
     # In a real test, we'd disconnect from network and reconnect
-    await sleepAsync(milliseconds(1000))
+    waitFor sleepAsync(1000)
     
     # Check that gossip continues to work after reconnection
     let (stats, totalPeers, healthyPeers, tableSize) = gossip.getStats()
@@ -205,8 +215,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Rate limiting with testnet":
     ## Test that rate limiting works correctly with testnet validators
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     var localPubkey = types.zeroPubkey()
     localPubkey[0] = 0x01
@@ -218,7 +228,7 @@ suite "Gossip Protocol Testnet Integration":
     
     # Send many messages quickly to test rate limiting
     # In a real test, we'd verify that rate limiting prevents spam
-    await sleepAsync(milliseconds(5000))
+    waitFor sleepAsync(5000)
     
     gossip.stop()
     
@@ -227,8 +237,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Leader schedule from testnet":
     ## Test that we can parse leader schedule from testnet CRDS values
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     var localPubkey = types.zeroPubkey()
     localPubkey[0] = 0x01
@@ -246,12 +256,12 @@ suite "Gossip Protocol Testnet Integration":
     waitFor gossip.start()
     
     # Wait for leader schedule to be populated
-    await sleepAsync(milliseconds(60000))
+    waitFor sleepAsync(60000)
     
     # Check if leader schedule is available
     if gossip.leaderSchedule.isSome():
       let schedule = gossip.leaderSchedule.get()
-      echo "Leader schedule available with ", schedule.leaders.len, " slot assignments"
+      echo "Leader schedule available with ", tables.len(schedule.leaders), " slot assignments"
       check true
     else:
       echo "Leader schedule not yet available"
@@ -263,8 +273,8 @@ suite "Gossip Protocol Testnet Integration":
   test "Protocol compliance - message serialization":
     ## Test that message serialization matches Solana format
     if not shouldRunTestnetTests():
-      skip("Set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests")
-      return
+      echo "Skipping: set NIMLANA_ENABLE_TESTNET_TESTS=1 to run testnet tests"
+      skip()
     
     # Test push message serialization
     var localPubkey = types.zeroPubkey()
@@ -291,7 +301,7 @@ suite "Gossip Protocol Testnet Integration":
     secretKey[0] = 0x01
     
     let pushMsg = createPushMessage(@[value], localPubkey, secretKey)
-    let pullReq = createPullRequest(localPubkey, secretKey)
+    let pullReq = createPullRequest(@[], localPubkey, secretKey)
     
     # Serialize messages
     let pushSerialized = serializeGossipMessage(pushMsg)
